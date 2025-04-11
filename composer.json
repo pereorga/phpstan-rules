@@ -1,10 +1,14 @@
 {
     "name": "pereorga/phpstan-rules",
-    "description": "Custom PHPStan rules for opinionated code style",
+    "description": "Custom PHPStan rules enforcing an opinionated code style.",
     "type": "phpstan-extension",
     "license": "MIT",
+    "keywords": [
+        "phpstan",
+        "phpstan-rules"
+    ],
     "require": {
-        "php": "^8.4",
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
         "phpstan/phpstan": "^2.0"
     },
     "autoload": {
