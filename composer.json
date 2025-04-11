@@ -1,0 +1,22 @@
+{
+    "name": "pereorga/phpstan-rules",
+    "description": "Custom PHPStan rules for opinionated code style",
+    "type": "phpstan-extension",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "phpstan/phpstan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "pereorga\\PHPStanRules\\": "src/"
+        }
+    },
+    "extra": {
+        "phpstan": {
+            "includes": [
+                "rules.neon"
+            ]
+        }
+    }
+}

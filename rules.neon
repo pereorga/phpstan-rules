@@ -1,0 +1,13 @@
+services:
+    - class: pereorga\PHPStanRules\Rules\NonRefParameterModificationRule
+      tags:
+          - phpstan.rules.rule
+    - class: pereorga\PHPStanRules\Rules\SnakeCaseFunctionRule
+      tags:
+          - phpstan.rules.rule
+    - class: pereorga\PHPStanRules\Rules\SnakeCaseParameterRule
+      tags:
+          - phpstan.rules.rule
+    - class: pereorga\PHPStanRules\Rules\SnakeCaseVariableRule
+      tags:
+          - phpstan.rules.rule
