@@ -23,13 +23,6 @@ includes:
 
 ## Rules
 
-This package provides the following rules:
-
-- [`PereOrga\PHPStanRules\Rules\NonRefParameterModificationRule`](https://github.com/pereorga/phpstan-rules#nonrefparametermodificationrule)
-- [`PereOrga\PHPStanRules\Rules\SnakeCaseFunctionRule`](https://github.com/pereorga/phpstan-rules#snakecasefunctionrule)
-- [`PereOrga\PHPStanRules\Rules\SnakeCaseParameterRule`](https://github.com/pereorga/phpstan-rules#snakecaseparameterrule)
-- [`PereOrga\PHPStanRules\Rules\SnakeCaseVariableRule`](https://github.com/pereorga/phpstan-rules#snakecasevariablerule)
-
 ### `NonRefParameterModificationRule`
 
 Disallows assigning values to parameters that are not passed by reference. Encourages the use of separate working variables.
