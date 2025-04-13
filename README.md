@@ -23,7 +23,7 @@ includes:
 
 ## Rules
 
-### `NonRefParameterModificationRule`
+### `NoNonReferenceParameterAssignmentRule`
 
 Disallows assigning values to parameters that are not passed by reference. Encourages the use of separate working variables.
 

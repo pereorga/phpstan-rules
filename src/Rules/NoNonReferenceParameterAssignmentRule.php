@@ -13,7 +13,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * @implements Rule<Assign>
  */
-final class NonRefParameterModificationRule implements Rule
+final class NoNonReferenceParameterAssignmentRule implements Rule
 {
     public function getNodeType(): string
     {

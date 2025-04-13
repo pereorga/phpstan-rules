@@ -1,5 +1,5 @@
 services:
-    - class: pereorga\PHPStanRules\Rules\NonRefParameterModificationRule
+    - class: pereorga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
       tags:
           - phpstan.rules.rule
     - class: pereorga\PHPStanRules\Rules\SnakeCaseFunctionRule
