@@ -2,6 +2,9 @@ services:
     - class: pereorga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
       tags:
           - phpstan.rules.rule
+    - class: pereorga\PHPStanRules\Rules\NoSuperfluousPhpDocTypesRule
+      tags:
+          - phpstan.rules.rule
     - class: pereorga\PHPStanRules\Rules\SnakeCaseFunctionRule
       tags:
           - phpstan.rules.rule
