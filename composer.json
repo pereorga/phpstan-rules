@@ -11,9 +11,18 @@
         "php": "^8.1",
         "phpstan/phpstan": "^2.0"
     },
+    "require-dev": {
+        "php-cs-fixer/shim": "^3.92",
+        "phpstan/phpstan-strict-rules": "^2.0"
+    },
     "autoload": {
         "psr-4": {
-            "pereorga\\PHPStanRules\\": "src/"
+            "PereOrga\\PHPStanRules\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PereOrga\\PHPStanRules\\Tests\\": "tests/"
         }
     },
     "extra": {
@@ -22,5 +31,11 @@
                 "rules.neon"
             ]
         }
+    },
+    "scripts": {
+        "php-cs-fixer": "vendor/bin/php-cs-fixer.phar fix --diff --no-interaction --ansi --show-progress=none",
+        "php-cs-fixer-lint": "vendor/bin/php-cs-fixer.phar fix --dry-run --verbose --stop-on-violation --no-interaction --ansi --show-progress=none",
+        "phpstan": "vendor/bin/phpstan analyse --memory-limit=256M --no-progress",
+        "test": "./phpunit.phar --testdox"
     }
 }

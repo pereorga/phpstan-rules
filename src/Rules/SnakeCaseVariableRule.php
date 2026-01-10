@@ -31,12 +31,12 @@ final class SnakeCaseVariableRule implements Rule
     public function processNode(Node $node, Scope $scope): array
     {
         // Skip dynamic variable names like ${$expr}.
-        if (!is_string($node->name)) {
+        if (!\is_string($node->name)) {
             return [];
         }
 
         $variable_name = $node->name;
-        if (in_array($variable_name, self::SUPERGLOBALS, true)) {
+        if (\in_array($variable_name, self::SUPERGLOBALS, true)) {
             return [];
         }
 

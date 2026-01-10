@@ -27,7 +27,7 @@ final class NoNonReferenceParameterAssignmentRule implements Rule
             return [];
         }
 
-        if (!is_string($node->var->name)) {
+        if (!\is_string($node->var->name)) {
             return [];
         }
 

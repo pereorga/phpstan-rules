@@ -1,16 +1,16 @@
 services:
-    - class: pereorga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
+    - class: PereOrga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
       tags:
           - phpstan.rules.rule
-    - class: pereorga\PHPStanRules\Rules\NoSuperfluousPhpDocTypesRule
+    - class: PereOrga\PHPStanRules\Rules\NoSuperfluousPhpDocTypesRule
       tags:
           - phpstan.rules.rule
-    - class: pereorga\PHPStanRules\Rules\SnakeCaseFunctionRule
+    - class: PereOrga\PHPStanRules\Rules\SnakeCaseFunctionRule
       tags:
           - phpstan.rules.rule
-    - class: pereorga\PHPStanRules\Rules\SnakeCaseParameterRule
+    - class: PereOrga\PHPStanRules\Rules\SnakeCaseParameterRule
       tags:
           - phpstan.rules.rule
-    - class: pereorga\PHPStanRules\Rules\SnakeCaseVariableRule
+    - class: PereOrga\PHPStanRules\Rules\SnakeCaseVariableRule
       tags:
           - phpstan.rules.rule

@@ -9,18 +9,10 @@ use PHPStan\Analyser\Scope;
 use PHPStan\Node\InFunctionNode;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
-use PHPStan\Type\ArrayType;
-use PHPStan\Type\CallableType;
-use PHPStan\Type\IterableType;
-use PHPStan\Type\ObjectType;
+use PHPStan\Type\MixedType;
 use PHPStan\Type\Type;
 use PHPStan\Type\UnionType;
-use function preg_match;
-use function sprintf;
-use function str_contains;
-use function strrpos;
-use function substr;
-use function trim;
+use PHPStan\Type\VerbosityLevel;
 
 /**
  * Detects @param and @return tags that redundantly duplicate type information already present in native type declarations.
@@ -52,7 +44,8 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
             $nativeType = $parameter->getNativeType();
 
             // Skip if no native type (type must be in PHPDoc)
-            if ($nativeType === null) {
+            // When no type hint exists, PHPStan returns MixedType or null
+            if ($nativeType === null || $nativeType instanceof MixedType) {
                 continue;
             }
 
@@ -74,7 +67,7 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
                 // Check if PHPDoc type matches or is redundant with native type
                 if ($this->isRedundantWithNativeType($phpDocType, $nativeType)) {
                     $errors[] = RuleErrorBuilder::message(
-                        sprintf(
+                        \sprintf(
                             '@param tag for parameter $%s has type %s which is already declared in the signature.',
                             $paramName,
                             $phpDocType
@@ -88,7 +81,8 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
 
         // Check @return tag
         $returnType = $functionReflection->getVariants()[0]->getNativeReturnType();
-        if ($returnType !== null && !$this->isComplexType($returnType)) {
+        // When no return type hint exists, PHPStan returns MixedType or null
+        if ($returnType !== null && !($returnType instanceof MixedType) && !$this->isComplexType($returnType)) {
             $pattern = '/@return\s+([^\s]+)/';
             if (preg_match($pattern, $docCommentText, $matches) === 1) {
                 $phpDocType = trim($matches[1]);
@@ -97,7 +91,7 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
                 if (!$this->hasComplexTypeAnnotation($phpDocType)) {
                     if ($this->isRedundantWithNativeType($phpDocType, $returnType)) {
                         $errors[] = RuleErrorBuilder::message(
-                            sprintf(
+                            \sprintf(
                                 '@return tag has type %s which is already declared in the signature.',
                                 $phpDocType
                             )
@@ -115,12 +109,33 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
     private function isComplexType(Type $type): bool
     {
         // Arrays, iterables, callables need PHPDoc for shape/generic information
-        if ($type instanceof ArrayType || $type instanceof IterableType || $type instanceof CallableType) {
+        if ($type->isArray()->yes() || $type->isIterable()->yes() || $type->isCallable()->yes()) {
             return true;
         }
 
         // Union types need PHPDoc if they're complex
         if ($type instanceof UnionType) {
+            // Simple nullable types (Type|null or ?Type) are not complex
+            $types = $type->getTypes();
+            if (\count($types) === 2) {
+                $hasNull = false;
+                $otherType = null;
+
+                foreach ($types as $innerType) {
+                    if ($innerType->isNull()->yes()) {
+                        $hasNull = true;
+                    } else {
+                        $otherType = $innerType;
+                    }
+                }
+
+                // If it's Type|null and the other type is simple, treat as not complex
+                if ($hasNull && $otherType !== null && !$this->isComplexType($otherType)) {
+                    return false;
+                }
+            }
+
+            // All other union types are complex (e.g., string|int)
             return true;
         }
 
@@ -139,13 +154,19 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
             return true;
         }
 
-        // Check for union types with more than just null: string|int
+        // Check for union types
         if (str_contains($phpDocType, '|')) {
             // Allow ?type (which is type|null)
             if (preg_match('/^\?/', $phpDocType) === 1) {
                 return false;
             }
 
+            // Allow simple nullable unions: type|null or null|type
+            if (preg_match('/^([^|]+)\|null$/i', $phpDocType) === 1 || preg_match('/^null\|([^|]+)$/i', $phpDocType) === 1) {
+                return false;
+            }
+
+            // All other union types are complex (e.g., string|int)
             return true;
         }
 
@@ -154,11 +175,15 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
 
     private function isRedundantWithNativeType(string $phpDocType, Type $nativeType): bool
     {
-        $nativeTypeString = $nativeType->describe(\PHPStan\Type\VerbosityLevel::typeOnly());
+        $nativeTypeString = $nativeType->describe(VerbosityLevel::typeOnly());
 
-        // Normalize nullable types
+        // Normalize nullable types - strip both ?prefix and |null suffix from both sides
         $phpDocType = preg_replace('/^\?/', '', $phpDocType) ?? $phpDocType;
-        $nativeTypeString = preg_replace('/\|null$/', '', $nativeTypeString) ?? $nativeTypeString;
+        $phpDocType = preg_replace('/\|null$/i', '', $phpDocType) ?? $phpDocType;
+        $phpDocType = preg_replace('/^null\|/i', '', $phpDocType) ?? $phpDocType;
+
+        $nativeTypeString = preg_replace('/\|null$/i', '', $nativeTypeString) ?? $nativeTypeString;
+        $nativeTypeString = preg_replace('/^null\|/i', '', $nativeTypeString) ?? $nativeTypeString;
 
         // Simple types that are redundant
         $simpleTypes = ['string', 'int', 'bool', 'float', 'void', 'mixed', 'never', 'null'];
@@ -170,19 +195,20 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
         }
 
         // Check for class types - handle both FQN and short names
-        if ($nativeType instanceof ObjectType) {
-            $className = $nativeType->getClassName();
+        if ($nativeType->isObject()->yes()) {
+            $classNames = $nativeType->getObjectClassNames();
+            foreach ($classNames as $className) {
+                // Check if PHPDoc type matches either the FQN or the short class name
+                if ($phpDocType === $className || $phpDocType === '\\' . $className) {
+                    return true;
+                }
 
-            // Check if PHPDoc type matches either the FQN or the short class name
-            if ($phpDocType === $className || $phpDocType === '\\' . $className) {
-                return true;
-            }
-
-            // Check if PHPDoc has short name and native type is FQN
-            $lastBackslash = strrpos($className, '\\');
-            $shortName = $lastBackslash !== false ? substr($className, $lastBackslash + 1) : $className;
-            if ($phpDocType === $shortName) {
-                return true;
+                // Check if PHPDoc has short name and native type is FQN
+                $lastBackslash = strrpos($className, '\\');
+                $shortName = $lastBackslash !== false ? substr($className, $lastBackslash + 1) : $className;
+                if ($phpDocType === $shortName) {
+                    return true;
+                }
             }
         }
 
