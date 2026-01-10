@@ -1,6 +1,6 @@
 # phpstan-rules
 
-This project provides a [Composer](https://getcomposer.org) package with some opinionated rules for [PHPStan](https://github.com/phpstan/phpstan).
+Opinionated rules for [PHPStan](https://github.com/phpstan/phpstan).
 
 ## Installation
 
