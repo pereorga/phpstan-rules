@@ -28,49 +28,49 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
 
     public function processNode(Node $node, Scope $scope): array
     {
-        $functionReflection = $node->getFunctionReflection();
-        $docComment = $node->getDocComment();
+        $function_reflection = $node->getFunctionReflection();
+        $doc_comment = $node->getDocComment();
 
-        if ($docComment === null) {
+        if ($doc_comment === null) {
             return [];
         }
 
         $errors = [];
-        $docCommentText = $docComment->getText();
+        $doc_comment_text = $doc_comment->getText();
 
         // Check @param tags
-        foreach ($functionReflection->getVariants()[0]->getParameters() as $parameter) {
-            $paramName = $parameter->getName();
-            $nativeType = $parameter->getNativeType();
+        foreach ($function_reflection->getVariants()[0]->getParameters() as $parameter) {
+            $param_name = $parameter->getName();
+            $native_type = $parameter->getNativeType();
 
             // Skip if no native type (type must be in PHPDoc)
             // When no type hint exists, PHPStan returns MixedType or null
-            if ($nativeType === null || $nativeType instanceof MixedType) {
+            if ($native_type === null || $native_type instanceof MixedType) {
                 continue;
             }
 
             // Skip complex types that need PHPDoc (arrays, iterables, callables, unions)
-            if ($this->isComplexType($nativeType)) {
+            if ($this->isComplexType($native_type)) {
                 continue;
             }
 
             // Check if there's a redundant @param tag
-            $pattern = '/@param\s+([^\s]+)\s+\$' . preg_quote($paramName, '/') . '\b/';
-            if (preg_match($pattern, $docCommentText, $matches) === 1) {
-                $phpDocType = trim($matches[1]);
+            $pattern = '/@param\s+([^\s]+)\s+\$' . preg_quote($param_name, '/') . '\b/';
+            if (preg_match($pattern, $doc_comment_text, $matches) === 1) {
+                $php_doc_type = trim($matches[1]);
 
                 // Skip if PHPDoc has complex type info (generics, arrays with shapes)
-                if ($this->hasComplexTypeAnnotation($phpDocType)) {
+                if ($this->hasComplexTypeAnnotation($php_doc_type)) {
                     continue;
                 }
 
                 // Check if PHPDoc type matches or is redundant with native type
-                if ($this->isRedundantWithNativeType($phpDocType, $nativeType)) {
+                if ($this->isRedundantWithNativeType($php_doc_type, $native_type)) {
                     $errors[] = RuleErrorBuilder::message(
                         \sprintf(
                             '@param tag for parameter $%s has type %s which is already declared in the signature.',
-                            $paramName,
-                            $phpDocType
+                            $param_name,
+                            $php_doc_type
                         )
                     )
                         ->identifier('superfluousPhpDocType.param')
@@ -80,20 +80,20 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
         }
 
         // Check @return tag
-        $returnType = $functionReflection->getVariants()[0]->getNativeReturnType();
+        $return_type = $function_reflection->getVariants()[0]->getNativeReturnType();
         // When no return type hint exists, PHPStan returns MixedType or null
-        if ($returnType !== null && !($returnType instanceof MixedType) && !$this->isComplexType($returnType)) {
+        if ($return_type !== null && !($return_type instanceof MixedType) && !$this->isComplexType($return_type)) {
             $pattern = '/@return\s+([^\s]+)/';
-            if (preg_match($pattern, $docCommentText, $matches) === 1) {
-                $phpDocType = trim($matches[1]);
+            if (preg_match($pattern, $doc_comment_text, $matches) === 1) {
+                $php_doc_type = trim($matches[1]);
 
                 // Skip if PHPDoc has complex type info
-                if (!$this->hasComplexTypeAnnotation($phpDocType)) {
-                    if ($this->isRedundantWithNativeType($phpDocType, $returnType)) {
+                if (!$this->hasComplexTypeAnnotation($php_doc_type)) {
+                    if ($this->isRedundantWithNativeType($php_doc_type, $return_type)) {
                         $errors[] = RuleErrorBuilder::message(
                             \sprintf(
                                 '@return tag has type %s which is already declared in the signature.',
-                                $phpDocType
+                                $php_doc_type
                             )
                         )
                             ->identifier('superfluousPhpDocType.return')
@@ -118,19 +118,19 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
             // Simple nullable types (Type|null or ?Type) are not complex
             $types = $type->getTypes();
             if (\count($types) === 2) {
-                $hasNull = false;
-                $otherType = null;
+                $has_null = false;
+                $other_type = null;
 
-                foreach ($types as $innerType) {
-                    if ($innerType->isNull()->yes()) {
-                        $hasNull = true;
+                foreach ($types as $inner_type) {
+                    if ($inner_type->isNull()->yes()) {
+                        $has_null = true;
                     } else {
-                        $otherType = $innerType;
+                        $other_type = $inner_type;
                     }
                 }
 
                 // If it's Type|null and the other type is simple, treat as not complex
-                if ($hasNull && $otherType !== null && !$this->isComplexType($otherType)) {
+                if ($has_null && $other_type !== null && !$this->isComplexType($other_type)) {
                     return false;
                 }
             }
@@ -142,27 +142,27 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
         return false;
     }
 
-    private function hasComplexTypeAnnotation(string $phpDocType): bool
+    private function hasComplexTypeAnnotation(string $php_doc_type): bool
     {
         // Check for array shapes: array{foo: string}
-        if (str_contains($phpDocType, '{')) {
+        if (str_contains($php_doc_type, '{')) {
             return true;
         }
 
         // Check for generics: array<string, int>, list<string>
-        if (str_contains($phpDocType, '<')) {
+        if (str_contains($php_doc_type, '<')) {
             return true;
         }
 
         // Check for union types
-        if (str_contains($phpDocType, '|')) {
+        if (str_contains($php_doc_type, '|')) {
             // Allow ?type (which is type|null)
-            if (preg_match('/^\?/', $phpDocType) === 1) {
+            if (preg_match('/^\?/', $php_doc_type) === 1) {
                 return false;
             }
 
             // Allow simple nullable unions: type|null or null|type
-            if (preg_match('/^([^|]+)\|null$/i', $phpDocType) === 1 || preg_match('/^null\|([^|]+)$/i', $phpDocType) === 1) {
+            if (preg_match('/^([^|]+)\|null$/i', $php_doc_type) === 1 || preg_match('/^null\|([^|]+)$/i', $php_doc_type) === 1) {
                 return false;
             }
 
@@ -173,47 +173,47 @@ final class NoSuperfluousPhpDocTypesRule implements Rule
         return false;
     }
 
-    private function isRedundantWithNativeType(string $phpDocType, Type $nativeType): bool
+    private function isRedundantWithNativeType(string $php_doc_type, Type $native_type): bool
     {
-        $nativeTypeString = $nativeType->describe(VerbosityLevel::typeOnly());
+        $native_type_string = $native_type->describe(VerbosityLevel::typeOnly());
 
         // Normalize nullable types - strip both ?prefix and |null suffix from both sides
-        $phpDocType = preg_replace('/^\?/', '', $phpDocType) ?? $phpDocType;
-        $phpDocType = preg_replace('/\|null$/i', '', $phpDocType) ?? $phpDocType;
-        $phpDocType = preg_replace('/^null\|/i', '', $phpDocType) ?? $phpDocType;
+        $normalized_doc_type = preg_replace('/^\?/', '', $php_doc_type) ?? $php_doc_type;
+        $normalized_doc_type = preg_replace('/\|null$/i', '', $normalized_doc_type) ?? $normalized_doc_type;
+        $normalized_doc_type = preg_replace('/^null\|/i', '', $normalized_doc_type) ?? $normalized_doc_type;
 
-        $nativeTypeString = preg_replace('/\|null$/i', '', $nativeTypeString) ?? $nativeTypeString;
-        $nativeTypeString = preg_replace('/^null\|/i', '', $nativeTypeString) ?? $nativeTypeString;
+        $native_type_string = preg_replace('/\|null$/i', '', $native_type_string) ?? $native_type_string;
+        $native_type_string = preg_replace('/^null\|/i', '', $native_type_string) ?? $native_type_string;
 
         // Simple types that are redundant
-        $simpleTypes = ['string', 'int', 'bool', 'float', 'void', 'mixed', 'never', 'null'];
+        $simple_types = ['string', 'int', 'bool', 'float', 'void', 'mixed', 'never', 'null'];
 
-        foreach ($simpleTypes as $simpleType) {
-            if ($phpDocType === $simpleType && str_contains($nativeTypeString, $simpleType)) {
+        foreach ($simple_types as $simple_type) {
+            if ($normalized_doc_type === $simple_type && str_contains($native_type_string, $simple_type)) {
                 return true;
             }
         }
 
         // Check for class types - handle both FQN and short names
-        if ($nativeType->isObject()->yes()) {
-            $classNames = $nativeType->getObjectClassNames();
-            foreach ($classNames as $className) {
+        if ($native_type->isObject()->yes()) {
+            $class_names = $native_type->getObjectClassNames();
+            foreach ($class_names as $class_name) {
                 // Check if PHPDoc type matches either the FQN or the short class name
-                if ($phpDocType === $className || $phpDocType === '\\' . $className) {
+                if ($normalized_doc_type === $class_name || $normalized_doc_type === '\\' . $class_name) {
                     return true;
                 }
 
                 // Check if PHPDoc has short name and native type is FQN
-                $lastBackslash = strrpos($className, '\\');
-                $shortName = $lastBackslash !== false ? substr($className, $lastBackslash + 1) : $className;
-                if ($phpDocType === $shortName) {
+                $last_backslash = strrpos($class_name, '\\');
+                $short_name = $last_backslash !== false ? substr($class_name, $last_backslash + 1) : $class_name;
+                if ($normalized_doc_type === $short_name) {
                     return true;
                 }
             }
         }
 
         // Exact match fallback
-        if ($phpDocType === $nativeTypeString) {
+        if ($normalized_doc_type === $native_type_string) {
             return true;
         }
 
