@@ -1,4 +1,7 @@
 services:
+    - class: PereOrga\PHPStanRules\Rules\NoRedundantBooleanComparisonRule
+      tags:
+          - phpstan.rules.rule
     - class: PereOrga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
       tags:
           - phpstan.rules.rule

@@ -23,6 +23,10 @@ includes:
 
 ## Rules
 
+### `NoRedundantBooleanComparisonRule`
+
+Disallows comparing boolean expressions with `=== true`, `=== false`, `!== true`, or `!== false`. Use the boolean value directly instead.
+
 ### `NoNonReferenceParameterAssignmentRule`
 
 Disallows assigning values to parameters that are not passed by reference. Encourages the use of separate working variables.
