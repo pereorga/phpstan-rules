@@ -1,0 +1,10 @@
+// Configuration for Renovate.
+{
+  extends: [
+    "config:best-practices",
+    "group:allNonMajor",
+    "group:allDigest",
+    ":semanticCommits",
+  ],
+  schedule: ["before 12pm on friday"],
+}
