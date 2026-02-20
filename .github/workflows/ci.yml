@@ -23,34 +23,20 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, intl
+          extensions: mbstring
           coverage: none
           tools: composer:v2
 
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+      - name: Install Composer dependencies
+        run: composer install --no-progress
 
       - name: Check code style
-        run: composer php-cs-fixer-lint
+        run: composer run php-cs-fixer-lint
 
       - name: Run PHPStan
-        run: composer phpstan
+        run: composer run phpstan
 
       - name: Run tests
         run: |
-          if [ ! -f phpunit.phar ]; then
-            wget -q https://phar.phpunit.de/phpunit.phar
-            chmod +x phpunit.phar
-          fi
-          composer test
+          curl --no-progress-meter --fail --location --retry 3 --retry-delay 2 --output phpunit.phar https://phar.phpunit.de/phpunit.phar
+          php phpunit.phar --testdox
