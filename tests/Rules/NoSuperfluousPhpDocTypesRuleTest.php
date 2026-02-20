@@ -10,14 +10,13 @@ use PHPStan\Testing\RuleTestCase;
 
 /**
  * @extends RuleTestCase<NoSuperfluousPhpDocTypesRule>
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 final class NoSuperfluousPhpDocTypesRuleTest extends RuleTestCase
 {
-    protected function getRule(): Rule
-    {
-        return new NoSuperfluousPhpDocTypesRule();
-    }
-
     public function testValidPhpDocUsage(): void
     {
         $this->analyse([__DIR__ . '/data/no-superfluous-phpdoc-valid.php'], []);
@@ -79,5 +78,10 @@ final class NoSuperfluousPhpDocTypesRuleTest extends RuleTestCase
                 74,
             ],
         ]);
+    }
+
+    protected function getRule(): Rule
+    {
+        return new NoSuperfluousPhpDocTypesRule();
     }
 }

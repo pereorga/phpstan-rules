@@ -10,14 +10,13 @@ use PHPStan\Testing\RuleTestCase;
 
 /**
  * @extends RuleTestCase<SnakeCaseFunctionRule>
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 final class SnakeCaseFunctionRuleTest extends RuleTestCase
 {
-    protected function getRule(): Rule
-    {
-        return new SnakeCaseFunctionRule();
-    }
-
     public function testValidSnakeCaseFunctions(): void
     {
         $this->analyse([__DIR__ . '/data/snake-case-function-valid.php'], []);
@@ -43,5 +42,10 @@ final class SnakeCaseFunctionRuleTest extends RuleTestCase
                 18,
             ],
         ]);
+    }
+
+    protected function getRule(): Rule
+    {
+        return new SnakeCaseFunctionRule();
     }
 }

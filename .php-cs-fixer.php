@@ -6,7 +6,9 @@ use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
 $finder = Finder::create()
-    ->in(__DIR__ . '/src');
+    ->in(__DIR__ . '/src')
+    ->in(__DIR__ . '/tests')
+    ->exclude('Rules/data');
 
 $config = new Config();
 $config

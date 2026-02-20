@@ -10,14 +10,13 @@ use PHPStan\Testing\RuleTestCase;
 
 /**
  * @extends RuleTestCase<NoNonReferenceParameterAssignmentRule>
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 final class NoNonReferenceParameterAssignmentRuleTest extends RuleTestCase
 {
-    protected function getRule(): Rule
-    {
-        return new NoNonReferenceParameterAssignmentRule();
-    }
-
     public function testValidUsage(): void
     {
         $this->analyse([__DIR__ . '/data/no-parameter-assignment-valid.php'], []);
@@ -39,5 +38,10 @@ final class NoNonReferenceParameterAssignmentRuleTest extends RuleTestCase
                 19,
             ],
         ]);
+    }
+
+    protected function getRule(): Rule
+    {
+        return new NoNonReferenceParameterAssignmentRule();
     }
 }

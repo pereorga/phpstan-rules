@@ -10,14 +10,13 @@ use PHPStan\Testing\RuleTestCase;
 
 /**
  * @extends RuleTestCase<NoRedundantBooleanComparisonRule>
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 final class NoRedundantBooleanComparisonRuleTest extends RuleTestCase
 {
-    protected function getRule(): Rule
-    {
-        return new NoRedundantBooleanComparisonRule();
-    }
-
     public function testValidBooleanUsage(): void
     {
         $this->analyse([__DIR__ . '/data/no-redundant-boolean-comparison-valid.php'], []);
@@ -51,5 +50,10 @@ final class NoRedundantBooleanComparisonRuleTest extends RuleTestCase
                 20,
             ],
         ]);
+    }
+
+    protected function getRule(): Rule
+    {
+        return new NoRedundantBooleanComparisonRule();
     }
 }
