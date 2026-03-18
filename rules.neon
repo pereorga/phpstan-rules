@@ -1,19 +1,7 @@
-services:
-    - class: PereOrga\PHPStanRules\Rules\NoRedundantBooleanComparisonRule
-      tags:
-          - phpstan.rules.rule
-    - class: PereOrga\PHPStanRules\Rules\NoNonReferenceParameterAssignmentRule
-      tags:
-          - phpstan.rules.rule
-    - class: PereOrga\PHPStanRules\Rules\NoSuperfluousPhpDocTypesRule
-      tags:
-          - phpstan.rules.rule
-    - class: PereOrga\PHPStanRules\Rules\SnakeCaseFunctionRule
-      tags:
-          - phpstan.rules.rule
-    - class: PereOrga\PHPStanRules\Rules\SnakeCaseParameterRule
-      tags:
-          - phpstan.rules.rule
-    - class: PereOrga\PHPStanRules\Rules\SnakeCaseVariableRule
-      tags:
-          - phpstan.rules.rule
+includes:
+    - rules/no-redundant-boolean-comparison.neon
+    - rules/no-non-reference-parameter-assignment.neon
+    - rules/no-superfluous-phpdoc-types.neon
+    - rules/snake-case-function.neon
+    - rules/snake-case-parameter.neon
+    - rules/snake-case-variable.neon

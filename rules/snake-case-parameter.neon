@@ -1,0 +1,4 @@
+services:
+    - class: PereOrga\PHPStanRules\Rules\SnakeCaseParameterRule
+      tags:
+          - phpstan.rules.rule

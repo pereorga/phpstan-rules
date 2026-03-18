@@ -1,0 +1,4 @@
+services:
+    - class: PereOrga\PHPStanRules\Rules\NoSuperfluousPhpDocTypesRule
+      tags:
+          - phpstan.rules.rule
