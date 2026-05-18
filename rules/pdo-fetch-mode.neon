@@ -1,0 +1,5 @@
+services:
+    -
+        class: PereOrga\PHPStanRules\Rules\PDOFetchModeRule
+        tags:
+            - phpstan.rules.rule

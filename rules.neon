@@ -5,3 +5,4 @@ includes:
     - rules/snake-case-function.neon
     - rules/snake-case-parameter.neon
     - rules/snake-case-variable.neon
+    - rules/pdo-fetch-mode.neon

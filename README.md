@@ -64,3 +64,9 @@ Requires all parameter names to be written in `snake_case`.
 [`rules/snake-case-variable.neon`](rules/snake-case-variable.neon)
 
 Requires all variable names to be written in `snake_case`.
+
+### `PDOFetchModeRule`
+
+[`rules/pdo-fetch-mode.neon`](rules/pdo-fetch-mode.neon)
+
+Ensures that `PDOStatement::fetch()` and `PDOStatement::fetchAll()` are always called with an explicit fetch mode.
