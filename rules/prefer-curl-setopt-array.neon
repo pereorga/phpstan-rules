@@ -1,0 +1,5 @@
+services:
+    -
+        class: PereOrga\PHPStanRules\Rules\PreferCurlSetoptArrayRule
+        tags:
+            - phpstan.rules.rule

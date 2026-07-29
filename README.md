@@ -70,3 +70,9 @@ Requires all variable names to be written in `snake_case`.
 [`rules/pdo-fetch-mode.neon`](rules/pdo-fetch-mode.neon)
 
 Ensures that `PDOStatement::fetch()` and `PDOStatement::fetchAll()` are always called with an explicit fetch mode.
+
+### `PreferCurlSetoptArrayRule`
+
+[`rules/prefer-curl-setopt-array.neon`](rules/prefer-curl-setopt-array.neon)
+
+Disallows multiple subsequent `curl_setopt()` calls on the same handle. Use a single `curl_setopt_array()` call instead.

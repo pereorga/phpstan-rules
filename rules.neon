@@ -2,6 +2,7 @@ includes:
     - rules/no-redundant-boolean-comparison.neon
     - rules/no-non-reference-parameter-assignment.neon
     - rules/no-superfluous-phpdoc-types.neon
+    - rules/prefer-curl-setopt-array.neon
     - rules/snake-case-function.neon
     - rules/snake-case-parameter.neon
     - rules/snake-case-variable.neon
