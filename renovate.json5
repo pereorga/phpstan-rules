@@ -6,5 +6,4 @@
     "group:allDigest",
     ":semanticCommits",
   ],
-  schedule: ["before 12pm on friday"],
 }
